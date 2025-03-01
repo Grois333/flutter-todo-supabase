@@ -2,6 +2,13 @@
 
 Flutter test app using supabase, google oauth
 
+## Working Video
+
+
+https://github.com/user-attachments/assets/c04a1cc9-9bd5-4799-b6ee-1c784480a1b7
+
+
+
 ## Install Flutter (If Not Installed)
 
 If you haven't installed Flutter yet, download and install it from:
