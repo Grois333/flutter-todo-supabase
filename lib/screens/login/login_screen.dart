@@ -29,7 +29,8 @@ class LoginScreen extends ConsumerWidget {
                       children: [
                         SizedBox(
                           width: 450,
-                          child: LoginForm(),
+                          child:
+                              FadeInLoginForm(), // FadeIn version of the LoginForm
                         ),
                       ],
                     ),
@@ -40,6 +41,40 @@ class LoginScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class FadeInLoginForm extends StatefulWidget {
+  const FadeInLoginForm({Key? key}) : super(key: key);
+
+  @override
+  _FadeInLoginFormState createState() => _FadeInLoginFormState();
+}
+
+class _FadeInLoginFormState extends State<FadeInLoginForm> {
+  double _opacity = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeInForm();
+  }
+
+  void _fadeInForm() async {
+    await Future.delayed(
+        const Duration(milliseconds: 500)); // Delay before starting animation
+    setState(() {
+      _opacity = 1.0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: _opacity,
+      duration: const Duration(seconds: 1), // Duration of the fade-in animation
+      child: const LoginForm(),
     );
   }
 }

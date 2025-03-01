@@ -53,6 +53,8 @@ GOOGLE_CLIENT_ID=google_web_clint_id
 IOS_CLIENT_ID=google_ios_client_id
 GOOGLE_API_CLIENT_ID_URL_SCHEME=google_ios_client_id_url_scheme
 ```
+
+And also in `ios/Flutter/GeneratedEnv.xcconfig` file replace `GOOGLE_API_CLIENT_ID_URL_SCHEME` with real `google_ios_client_id_url_scheme`
 You should make these from **Supabase Dashbord** and **Google Developer Console**.
 You can refer in "[**Set Up Supabase Api key**](#set-up-supabase-api-key)" and "[**Set Up Google OAuth in the Supabase Dashboard**](#set-up-google-oauth-in-the-supabase-dashboard)"
 
@@ -64,6 +66,7 @@ From `supabase/functions/create_words_table.sql`
 - Click **RUN**.
 
 you will see words table in tables list.
+And then visit table in **edit table** please check **Enable Realtime**
 
 ### 🔹 Run Command
 ```
@@ -147,7 +150,7 @@ flutter pub run build_runner build
     
     - Set Up **OAuth Credentials**
         - **Create OAuth Client ID**:
-            - For **Android**:
+            - For **Web**:
                 - Now, select **Web application** as the **application type**.
                 - In the **Name** field, enter something like ```Flutter OAuth Web Client```.
                 - **Authorized JavaScript Origins**: You can leave this empty (this is more useful for web apps).
@@ -162,6 +165,17 @@ flutter pub run build_runner build
                 - In the **Name** field, enter something like ```Flutter OAuth IOS Client```.
                 - In **Bundle Id field**, enter bundle identifier from ```info.plist``` (e.g., com.example.supabaseWordApp)
                 - For **App Store ID** and **Team ID**, leave to empty
+                - Click **CREATE**
+            - For **Android**:
+                - Now, select **Android** as the **application type**.
+                - In the **Name** field, enter something like ```Flutter OAuth IOS Client```.
+                - In **Package name**, get package name from ```AndroidManifest.xml``` (e.g., com.example.supabase_word_app)
+                - And then input **SHA-1 certificate fingerprint**
+                    - in Command Prompt create finger print by following command
+                        `keytool -keystore path-to-debug-or-production-keystore -list -v`
+                        e.g.
+                        `keytool -keystore C:\Users\issac\.android\debug.keystore -list -v`
+                    - And then copy SHA-1 fingerprint and paste to above input field.
                 - Click **CREATE**
         - **Copy credentials**:
             Once the client ID is created, you will see a **Client ID** and **Client Secret**.
