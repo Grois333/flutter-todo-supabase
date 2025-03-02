@@ -1,130 +1,142 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:logger/logger.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:supabase_word_app/app_router.dart';
-import 'package:supabase_word_app/components/signin_oauth.dart';
-import 'package:supabase_word_app/providers/loading_provider.dart';
-import 'package:supabase_word_app/utils/validators.dart';
-import '../../../components/already_have_an_account_acheck.dart';
-import '../../../constants/constants.dart';
-import '../../../services/supabase_service.dart';
+import 'package:supabase_word_app/models/user_model.dart';
+import 'package:supabase_word_app/models/word_model.dart';
+import 'package:supabase_word_app/providers/user_provider.dart';
 
-class LoginForm extends ConsumerWidget {
-  const LoginForm({super.key});
+final supabase = Supabase.instance.client;
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final formKey = GlobalKey<FormState>();
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    final supabaseService = SupabaseService();
-    final logger = Logger();
+class WordNotifier extends StateNotifier<List<WordModel>> {
+  WordNotifier(this.ref) : super([]) {
+    fetchWordsAll();
+    _subscribeToWords(); // Start the real-time subscription
+  }
 
-    // Login with email and password
-    Future<void> handleLogin(BuildContext context) async {
-      if (formKey.currentState!.validate()) {
-        ref.read(loadingProvider.notifier).setLoading(true);
+  final Ref ref;
+  UserModel? get user => ref.read(userProvider);
 
-        try {
-          await supabaseService.login(
-              emailController.text.trim(), passwordController.text.trim());
+  // Fetch all words for all users (not filtered by user_id)
+  Future<void> fetchWordsAll() async {
+    final response =
+        await supabase.from('words').select(); // Fetch words for all users
 
-          if (!context.mounted) return;
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Logged in successful.')),
-          );
-          context.router.replace(const WordListRoute());
-        } on AuthException catch (error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Login failed: ${error.message}')),
-          );
-          logger.e('Login failed', error: error);
-        } catch (error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Unexpected error: $error')),
-          );
-          logger.e('Unexpected error', error: error);
-        } finally {
-          ref.read(loadingProvider.notifier).setLoading(false);
-        }
-      }
+    // Map the Supabase response to a list of WordModel
+    state = response.map<WordModel>((word) {
+      return WordModel(
+        id: word['id'] as int,
+        word: word['word'] as String,
+        userId: word['user_id'] as String,
+      );
+    }).toList();
+  }
+
+  // Real-time subscription for insert, update, and delete events
+  void _subscribeToWords() {
+    supabase
+        .channel('public:words')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'words',
+          callback: (payload) {
+            if (user?.id != payload.newRecord['user_id'] as String) {
+              final newWord = WordModel(
+                id: payload.newRecord['id'] as int,
+                word: payload.newRecord['word'] as String,
+                userId: payload.newRecord['user_id'] as String,
+              );
+              state = [...state, newWord]; // Add the new word to the state
+            }
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.update,
+          schema: 'public',
+          table: 'words',
+          callback: (payload) {
+            if (user?.id != payload.newRecord['user_id'] as String) {
+              final updatedWord = WordModel(
+                id: payload.newRecord['id'] as int,
+                word: payload.newRecord['word'] as String,
+                userId: payload.newRecord['user_id'] as String,
+              );
+              state = state
+                  .map((word) => word.id == updatedWord.id ? updatedWord : word)
+                  .toList(); // Update the word
+            }
+          },
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.delete,
+          schema: 'public',
+          table: 'words',
+          callback: (payload) {
+            state = state
+                .where((word) => word.id != payload.oldRecord['id'] as int)
+                .toList(); // Remove deleted word
+          },
+        )
+        .subscribe(); // Begin subscription to real-time changes
+  }
+
+  // Add new word (user's ID will be saved with the word)
+  Future<void> addWord(String newWord) async {
+    final user = ref.read(userProvider);
+    if (user == null) return;
+
+    newWord = newWord.trim();
+    if (newWord.isEmpty) return;
+
+    final response = await supabase
+        .from('words')
+        .insert({
+          'word': newWord,
+          'user_id': user.id, // Store the user's ID with the word
+        })
+        .select()
+        .single();
+    state = [
+      ...state,
+      WordModel(
+        id: response['id'] as int,
+        word: response['word'] as String,
+        userId: response['user_id'] as String,
+      )
+    ];
+    // Fetch the total count of words for the authenticated user
+    final countResponse =
+        await supabase.from('words').select('id').eq('user_id', user.id);
+
+    int wordCount = countResponse.length;
+
+    // Check if the word count matches the predefined milestones
+    if ([5, 12, 17, 21, 25].contains(wordCount)) {
+      Fluttertoast.showToast(
+        msg: "You have $wordCount words!",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+      );
     }
+  }
 
-    return Column(children: [
-      Form(
-        key: formKey, // Assign key
-        child: Column(
-          children: [
-            TextFormField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              textInputAction: TextInputAction.next,
-              cursorColor: kPrimaryColor,
-              decoration: const InputDecoration(
-                hintText: "Your email",
-                prefixIcon: Padding(
-                  padding: EdgeInsets.all(defaultPadding),
-                  child: Icon(Icons.person),
-                ),
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                if (!isValidEmail(value)) {
-                  return 'Enter a valid email';
-                }
+  // Delete word only for the authenticated user
+  Future<void> deleteWord(int id) async {
+    final user = ref.read(userProvider);
+    if (user == null) return;
 
-                return null;
-              },
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: defaultPadding),
-              child: TextFormField(
-                controller: passwordController,
-                textInputAction: TextInputAction.done,
-                obscureText: true,
-                cursorColor: kPrimaryColor,
-                decoration: const InputDecoration(
-                  hintText: "Your password",
-                  prefixIcon: Padding(
-                    padding: EdgeInsets.all(defaultPadding),
-                    child: Icon(Icons.lock),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  if (!isValidPassword(value)) {
-                    return 'Password must be at least 6 characters';
-                  }
+    await supabase
+        .from('words')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', user.id); // Ensure only user's words are deleted
 
-                  return null;
-                },
-              ),
-            ),
-            const SizedBox(height: defaultPadding),
-            ElevatedButton(
-              onPressed: () => handleLogin(context),
-              child: Text("Login".toUpperCase()),
-            ),
-            const SizedBox(height: defaultPadding),
-            AlreadyHaveAnAccountCheck(
-              press: () {
-                context.router.replace(const SignUpRoute());
-              },
-            ),
-          ],
-        ),
-      ),
-
-      const SizedBox(height: 20),
-
-      // Add social login buttons at the bottom
-      const SignInOauth(),
-    ]);
+    fetchWordsAll(); // Refresh list after deletion
   }
 }
+
+// Riverpod Provider for WordNotifier
+final wordProvider =
+    StateNotifierProvider<WordNotifier, List<WordModel>>((ref) {
+  return WordNotifier(ref);
+});
