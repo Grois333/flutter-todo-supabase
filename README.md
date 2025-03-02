@@ -6,6 +6,10 @@ Flutter test app using supabase, google oauth
 
 https://github.com/user-attachments/assets/170782bf-58a1-47ec-a80c-c5e57bfedfd1
 
+### Email Login video
+
+https://github.com/user-attachments/assets/ea303017-928b-4fb0-b5f5-084c701782cb
+
 
 ## Install Flutter (If Not Installed)
 
