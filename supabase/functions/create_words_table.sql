@@ -7,6 +7,8 @@ CREATE TABLE words (
 
 ALTER TABLE words ENABLE ROW LEVEL SECURITY;
 
+ALTER PUBLICATION supabase_realtime ADD TABLE words;
+
 CREATE POLICY "Allow all users to read words"
 ON words
 FOR SELECT

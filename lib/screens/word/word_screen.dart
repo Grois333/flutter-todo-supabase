@@ -24,7 +24,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
     Future.delayed(const Duration(milliseconds: 300), () {
       if (_scrollController.hasClients) {
         _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
+          _scrollController.position.maxScrollExtent + 50,
           duration: const Duration(milliseconds: 500),
           curve: Curves.easeOut,
         );
@@ -56,7 +56,7 @@ class _WordListScreenState extends ConsumerState<WordListScreen> {
                     itemCount: words.length,
                     itemBuilder: (context, index) {
                       final word = words[index];
-                      final isUserWord = word.user_id == user?.id;
+                      final isUserWord = word.userId == user?.id;
                       final isNew =
                           index == words.length - 1; // Highlight latest word
 

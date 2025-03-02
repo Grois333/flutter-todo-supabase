@@ -29,33 +29,33 @@ class _SignInOauthState extends ConsumerState<SignInOauth>
     // Initialize the animation controller
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 500),
     );
 
     // Create animations for the buttons
     _googleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0, end: -10), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: -10, end: 10), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 10, end: 0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 0, end: -5), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: -5, end: 5), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 5, end: 0), weight: 50),
     ]).animate(_controller);
 
     _facebookAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0, end: 10), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 10, end: -10), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: -10, end: 0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 0, end: 5), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 5, end: -5), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: -5, end: 0), weight: 50),
     ]).animate(_controller);
 
     _appleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 0, end: -10), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: -10, end: 10), weight: 50),
-      TweenSequenceItem(tween: Tween(begin: 10, end: 0), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 0, end: -5), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: -5, end: 5), weight: 50),
+      TweenSequenceItem(tween: Tween(begin: 5, end: 0), weight: 50),
     ]).animate(_controller);
 
     // Start the animation
-    _controller.repeat(reverse: true, period: const Duration(seconds: 3));
+    _controller.repeat(reverse: true, period: const Duration(seconds: 1));
 
     // Stop animation after 3 seconds
-    Future.delayed(const Duration(seconds: 3), () {
+    Future.delayed(const Duration(seconds: 2), () {
       _controller.stop();
     });
   }
@@ -73,15 +73,14 @@ class _SignInOauthState extends ConsumerState<SignInOauth>
     try {
       bool isSignedIn = await supabaseService.googleSignInFunction();
       if (isSignedIn) {
-        context.router.replace(const WordListRoute());
-      } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Sign-In failed!')),
+          SnackBar(content: Text('Google OAuth Successfully loggedin!')),
         );
+        context.router.replace(const WordListRoute());
       }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $error')),
+        SnackBar(content: Text('$error')),
       );
     } finally {
       ref.read(loadingProvider.notifier).setLoading(false);

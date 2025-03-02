@@ -1,6 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logger/logger.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:supabase_word_app/app_router.dart';
 import 'package:supabase_word_app/components/signin_oauth.dart';
 import 'package:supabase_word_app/providers/loading_provider.dart';
@@ -19,13 +21,14 @@ class SignUpForm extends ConsumerWidget {
     final TextEditingController confirmPasswordController =
         TextEditingController();
     final SupabaseService supabaseService = SupabaseService();
+    final logger = Logger();
 
     Future<void> handleSignup(BuildContext context) async {
       if (formKey.currentState!.validate()) {
         ref.read(loadingProvider.notifier).setLoading(true);
 
         try {
-          await supabaseService.signUp(
+          final response = await supabaseService.signUp(
             emailController.text.trim(),
             passwordController.text.trim(),
           );
@@ -34,14 +37,23 @@ class SignUpForm extends ConsumerWidget {
               const SnackBar(content: Text('Signup successful.')),
             );
 
-            // Navigate to Home Screen after successful signup
-            context.router.replace(const WordListRoute());
+            // Navigate to Login page after successful signup
+            context.router.replace(const LoginRoute());
           }
+          logger.i("Signup successful: ${response.user?.email}");
+        } on AuthException catch (error) {
+          if (context.mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Signup failed: ${error.message}')),
+            );
+          }
+          logger.e('Signup failed', error: error);
         } catch (error) {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Signup failed: $error')),
+              SnackBar(content: Text('Unexpected error: $error')),
             );
+            logger.e('Unexpected error', error: error);
           }
         } finally {
           ref.read(loadingProvider.notifier).setLoading(false);

@@ -1,7 +1,7 @@
+import 'package:logger/logger.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_word_app/constants/constants.dart';
-import 'package:flutter/foundation.dart';
 
 class SupabaseService {
   final SupabaseClient supabase = Supabase.instance.client;
@@ -9,6 +9,7 @@ class SupabaseService {
     clientId: iosClientId,
     serverClientId: googleClientId, // Make sure this is set correctly
   );
+  final logger = Logger();
 
   // Check if user is logged in
   User? getCurrentUser() {
@@ -24,8 +25,10 @@ class SupabaseService {
     await supabase.auth.signInWithPassword(email: email, password: password);
   }
 
-  Future<void> signUp(String email, String password) async {
-    await supabase.auth.signUp(email: email, password: password);
+  Future<AuthResponse> signUp(String email, String password) async {
+    final response =
+        await supabase.auth.signUp(email: email, password: password);
+    return response;
   }
 
   Future<void> logout() async {
@@ -35,9 +38,8 @@ class SupabaseService {
 
   // Google Sign-In logic in SupabaseService
   Future<bool> googleSignInFunction() async {
-    await GoogleSignIn().signOut();
-
     try {
+      await _googleSignIn.signOut();
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         // If the user cancels the sign-in
@@ -58,14 +60,18 @@ class SupabaseService {
         );
 
         if (response.user == null) {
-          throw Exception('Sign-In failed!');
+          throw Exception('Sign-In Canceled!');
         }
         return true;
       } else {
-        throw Exception('Google authentication tokens are null');
+        return false;
       }
+    } on AuthException catch (error) {
+      logger.e('Error during Google sign-in', error: error);
+      throw Exception('Error during Google sign-in: ${error.message}');
     } catch (error) {
-      throw Exception('Error during Google sign-in: $error');
+      logger.e('Error during Google sign-in:', error: error);
+      throw Exception('Unexpected error: $error');
     }
   }
 }

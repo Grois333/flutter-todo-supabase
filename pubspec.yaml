@@ -47,6 +47,7 @@ dependencies:
   flutter_loading_overlay: ^1.0.3
   overlay_loader_with_app_icon: ^0.0.4
   confirm_dialog: ^1.0.4
+  logger: ^2.5.0
 
 dev_dependencies:
   flutter_test:
