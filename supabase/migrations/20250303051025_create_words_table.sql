@@ -5,6 +5,8 @@ CREATE TABLE words (
     created_at TIMESTAMP DEFAULT now()
 );
 
+COMMENT ON TABLE words IS 'This table stores a list of words for the Flutter app.';
+
 ALTER TABLE words ENABLE ROW LEVEL SECURITY;
 
 ALTER PUBLICATION supabase_realtime ADD TABLE words;
