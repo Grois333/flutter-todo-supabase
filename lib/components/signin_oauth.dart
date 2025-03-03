@@ -10,10 +10,10 @@ class SignInOauth extends ConsumerStatefulWidget {
   const SignInOauth({super.key});
 
   @override
-  _SignInOauthState createState() => _SignInOauthState();
+  SignInOauthState createState() => SignInOauthState();
 }
 
-class _SignInOauthState extends ConsumerState<SignInOauth>
+class SignInOauthState extends ConsumerState<SignInOauth>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _googleAnimation;
@@ -73,12 +73,14 @@ class _SignInOauthState extends ConsumerState<SignInOauth>
     try {
       bool isSignedIn = await supabaseService.googleSignInFunction();
       if (isSignedIn) {
+        if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Google OAuth Successfully loggedin!')),
+          SnackBar(content: Text('Google OAuth Successfully logged!')),
         );
         context.router.replace(const WordListRoute());
       }
     } catch (error) {
+      if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('$error')),
       );

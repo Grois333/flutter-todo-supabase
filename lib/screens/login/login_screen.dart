@@ -46,13 +46,13 @@ class LoginScreen extends ConsumerWidget {
 }
 
 class FadeInLoginForm extends StatefulWidget {
-  const FadeInLoginForm({Key? key}) : super(key: key);
+  const FadeInLoginForm({super.key});
 
   @override
-  _FadeInLoginFormState createState() => _FadeInLoginFormState();
+  FadeInLoginFormState createState() => FadeInLoginFormState();
 }
 
-class _FadeInLoginFormState extends State<FadeInLoginForm> {
+class FadeInLoginFormState extends State<FadeInLoginForm> {
   double _opacity = 0.0;
 
   @override

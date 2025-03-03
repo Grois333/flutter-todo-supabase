@@ -34,7 +34,6 @@ class SignUpScreen extends ConsumerWidget {
                           child: SignUpForm(),
                         ),
                         SizedBox(height: defaultPadding / 2),
-                        // SocalSignUp()
                       ],
                     ),
                   )
@@ -50,8 +49,8 @@ class SignUpScreen extends ConsumerWidget {
 
 class MobileSignupScreen extends StatelessWidget {
   const MobileSignupScreen({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +67,6 @@ class MobileSignupScreen extends StatelessWidget {
             Spacer(),
           ],
         ),
-        // const SocalSignUp()
       ],
     );
   }

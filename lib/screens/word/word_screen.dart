@@ -13,10 +13,10 @@ class WordListScreen extends ConsumerStatefulWidget {
   const WordListScreen({super.key});
 
   @override
-  _WordListScreenState createState() => _WordListScreenState();
+  WordListScreenState createState() => WordListScreenState();
 }
 
-class _WordListScreenState extends ConsumerState<WordListScreen> {
+class WordListScreenState extends ConsumerState<WordListScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -134,18 +134,18 @@ class WordItem extends StatefulWidget {
   final VoidCallback? onDelete;
 
   const WordItem({
-    Key? key,
+    super.key,
     required this.word,
     required this.isUserWord,
     this.isNew = false,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
-  _WordItemState createState() => _WordItemState();
+  WordItemState createState() => WordItemState();
 }
 
-class _WordItemState extends State<WordItem> {
+class WordItemState extends State<WordItem> {
   Color _backgroundColor = Colors.grey.shade300;
 
   @override
@@ -177,7 +177,7 @@ class _WordItemState extends State<WordItem> {
         border: Border.all(color: Colors.grey.shade300, width: 1),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 3,
             offset: const Offset(1, 2),
           ),

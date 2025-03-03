@@ -7,7 +7,7 @@ import 'package:supabase_word_app/app_router.dart';
 class AppHeader extends ConsumerWidget implements PreferredSizeWidget {
   final String title;
 
-  const AppHeader({Key? key, required this.title}) : super(key: key);
+  const AppHeader({super.key, required this.title});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
