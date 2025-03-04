@@ -67,15 +67,21 @@ And also in `ios/Flutter/GeneratedEnv.xcconfig` file replace `GOOGLE_API_CLIENT_
 You should make these from **Supabase Dashbord** and **Google Developer Console**.
 You can refer in "[**Set Up Supabase Api key**](#set-up-supabase-api-key)" and "[**Set Up Google OAuth in the Supabase Dashboard**](#set-up-google-oauth-in-the-supabase-dashboard)"
 
-### 🔹 Make word table in supabase dashboard by manually
-From `supabase/functions/create_words_table.sql`
-- move to **Supabase Dashboard**
-- On the left sidebar, go to **Database** > **SQL Editor**.
-- Click "**New Query**" and enter your SQL commands.
-- Click **RUN**.
+### 🔹 Database Operations
+first login to supabase
+```
+supabase login
+```
 
-you will see words table in tables list.
-And then visit table in **edit table** please check **Enable Realtime**
+Link local project to supabase.
+```
+supabase link --project-ref <project_id>
+```
+
+and run supabase push command
+```
+supabase push db
+```
 
 ### 🔹 Run Command
 ```
